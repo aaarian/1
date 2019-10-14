@@ -13,48 +13,37 @@ const getCustomers = () => {
   return datastore.runQuery(query);
 };
 
-  app.get('/Customers', async (req, res, next) => {
+  app.get('/getCustomers', async (req, res, next) => {
+
     try {
       const [entities] = await getCustomers();
-      const customers = entities.map(
-        entity => 
-        `Id: ${entity[datastore.KEY].id}, 
-        First name: ${entity.firstName}, 
-        Last name: ${entity.lastName},
-        Social security number: ${entity.ssn}`
-      );
-      res
-        .status(200)
-        .set('Content-Type', 'text/plain')
-        .send(`Last 10 customers:\n${customers.join('\n')}`)
-        .end();
+      res.json(entities)
     } catch (error) {
       next(error);
     }
   });
 
-  app.get('/Customer', async (req, res, next) => {
-try {
-      const [entities] = await getCustomers();
-      const customer = entities
-        .filter(entity => 
-        entity[datastore.KEY].id == req.query.id)  
-        .map(
-        entity => 
-        `Id: ${entity[datastore.KEY].id}, 
-        First name: ${entity.firstName}, 
-        Last name: ${entity.lastName},
-        Social security number: ${entity.ssn}`
-      );
-      res
-        .status(200)
-        .set('Content-Type', 'text/plain')
-        .send(`Customer:\n${customer}`)
-        .end();
-    } catch (error) {
-      next(error);
+  app.get('/getCustomer', async (req, res, next) => {
+    if (req.query.id === ''){
+    try {
+        const [entities] = await getCustomers();
+        const entityKeys = entities.map(entity => entity[datastore.KEY].id);
+        res.json({id: entityKeys})
+      } catch (error) {
+        next(error);
+      }
     }
-  });
+    else {
+        try {
+          const [entities] = await getCustomers();
+          const entity = entities.filter(entity => 
+            entity[datastore.KEY].id == req.query.id);
+          res.json(entity[0])
+        } catch (error) {
+          next(error);
+        }
+      }
+    });
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
