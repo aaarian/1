@@ -33,7 +33,29 @@ const getCustomers = () => {
     }
   });
 
-  
+  app.get('/Customer', async (req, res, next) => {
+try {
+      const [entities] = await getCustomers();
+      const customer = entities
+        .filter(entity => 
+        entity[datastore.KEY].id == req.query.id)  
+        .map(
+        entity => 
+        `Id: ${entity[datastore.KEY].id}, 
+        First name: ${entity.firstName}, 
+        Last name: ${entity.lastName},
+        Social security number: ${entity.ssn}`
+      );
+      res
+        .status(200)
+        .set('Content-Type', 'text/plain')
+        .send(`Customer:\n${customer}`)
+        .end();
+    } catch (error) {
+      next(error);
+    }
+  });
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
