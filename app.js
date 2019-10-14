@@ -4,38 +4,36 @@ app.enable('trust proxy');
 const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 
-async function listCustomers() {
-    const query = datastore.createQuery('Customer');
-    const [entities] = await datastore.runQuery(query);
-    console.log('Customers:');
-    for (const entity of entities) {
-      const entityKey = entity[datastore.KEY];
-      console.log(entityKey.id, entity);
-    }
-    return datastore.runQuery(query);
-  };
+const getCustomers = () => {
+  const query = datastore
+    .createQuery('Customer')
+    .order('lastName', {descending: true})
+    .limit(10);
 
-  app.get('/listCustomers', async (req, res, next) => {
+  return datastore.runQuery(query);
+};
 
+  app.get('/Customers', async (req, res, next) => {
     try {
-      const [entities] = await listCustomers();
-      res.json(entities)
+      const [entities] = await getCustomers();
+      const customers = entities.map(
+        entity => 
+        `Id: ${entity[datastore.KEY].id}, 
+        First name: ${entity.firstName}, 
+        Last name: ${entity.lastName},
+        Social security number: ${entity.ssn}`
+      );
+      res
+        .status(200)
+        .set('Content-Type', 'text/plain')
+        .send(`Last 10 customers:\n${customers.join('\n')}`)
+        .end();
     } catch (error) {
       next(error);
     }
   });
 
-  app.get('/listCustomer', async (req, res, next) => {
-    try {
-        const [entities] = await listCustomers();
-        const entity = entities.filter(entity => 
-          entity[datastore.KEY].id == req.query.id);
-        res.json(entity)
-      } catch (error) {
-        next(error);
-      }
-    });
-
+  
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
