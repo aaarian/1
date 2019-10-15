@@ -16,8 +16,8 @@ const getCustomers = () => {
 const getCustomerByID = (custId) => {   
   const query = datastore
     .createQuery('Customer')
-    .filter('id', '=', custId);
-    //.filter('__key__', '=', datastore.key(['Customer', custId]));
+    //.filter('id', '=', custId);
+    .filter('__key__', '=', datastore.key(['Customer', custId]));
   
   return datastore.runQuery(query);
 };
@@ -31,9 +31,11 @@ const getCustomerByID = (custId) => {
       next(error);
     }
   });
-
+ 
   app.get('/getCustomer', async (req, res, next) => {
-    if (req.query.id === ''){
+    const custId = req.query.id;
+
+    if (custId === ''){
     try {
         const [entities] = await getCustomers();
         const entityKeys = entities.map(entity => entity[datastore.KEY].id);
@@ -44,10 +46,13 @@ const getCustomerByID = (custId) => {
     }
     else {
       try {
+        /*const entity = await getCustomerByID(custId);
+        res.json(entity)*/
         const [entities] = await getCustomerByID(custId);
         const entity = entities.filter(entity => 
-          entity[datastore.KEY].id == req.query.id);
+          entity[datastore.KEY].id == custId);
         res.json(entity[0])
+        //res.json(entity)
       } catch (error) {
         next(error);
       }
