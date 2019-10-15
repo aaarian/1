@@ -13,6 +13,15 @@ const getCustomers = () => {
   return datastore.runQuery(query);
 };
 
+const getCustomerByID = (custId) => {   
+  const query = datastore
+    .createQuery('Customer')
+    .filter('id', '=', custId);
+    //.filter('__key__', '=', datastore.key(['Customer', custId]));
+  
+  return datastore.runQuery(query);
+};
+
   app.get('/getCustomers', async (req, res, next) => {
 
     try {
@@ -34,14 +43,14 @@ const getCustomers = () => {
       }
     }
     else {
-        try {
-          const [entities] = await getCustomers();
-          const entity = entities.filter(entity => 
-            entity[datastore.KEY].id == req.query.id);
-          res.json(entity[0])
-        } catch (error) {
-          next(error);
-        }
+      try {
+        const [entities] = await getCustomerByID(custId);
+        const entity = entities.filter(entity => 
+          entity[datastore.KEY].id == req.query.id);
+        res.json(entity[0])
+      } catch (error) {
+        next(error);
+      }
       }
     });
 
