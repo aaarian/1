@@ -14,12 +14,10 @@ const getCustomers = () => {
 };
 
 const getCustomerByID = (custId) => {
-  const cust = parseInt(custId);
-  //const key = datastore.key(['Customer', cust]);   
+  const cust = parseInt(custId);   
   const query = datastore
     .createQuery('Customer')
     .filter('customerID', '=', cust);
-  //  .filter('__key__', key);
 
   
   return datastore.runQuery(query);
