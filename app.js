@@ -15,10 +15,12 @@ const getCustomers = () => {
 
 const getCustomerByID = (custId) => {
   const cust = parseInt(custId);
-  const key = datastore.key(['Customer', cust]);   
+  //const key = datastore.key(['Customer', cust]);   
   const query = datastore
     .createQuery('Customer')
-    .filter('__key__', key);
+    .filter('customerID', '=', cust);
+  //  .filter('__key__', key);
+
   
   return datastore.runQuery(query);
 };
@@ -39,7 +41,7 @@ const getCustomerByID = (custId) => {
     if (custId === ''){
     try {
         const [entities] = await getCustomers();
-        const entityKeys = entities.map(entity => entity[datastore.KEY].id);
+        const entityKeys = entities.map(entity => entity.customerID);
         res.json({id: entityKeys})
       } catch (error) {
         next(error);
